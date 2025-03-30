@@ -1,5 +1,4 @@
-// Generative Star Map Explorer
-// A procedurally generated universe with interactive star systems
+
 
 let stars = [];
 let numStars = 100;
