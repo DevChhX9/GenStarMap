@@ -18,21 +18,20 @@ let starSuffixes = [
   "Prime", "Secundus", "Tertius", "Minor", "Major", "Centauri"
 ];
 
-// Audio variables
+
 let oscillators = [];
 let isAudioStarted = false;
 
 let debugMode = false;
 
-// Transition animation variables
 let isTransitioning = false;
 let transitionStartTime = 0;
-let transitionDuration = 2000; // 2 seconds
+let transitionDuration = 2000; 
 let transitionStar = null;
 let transitionStartCameraX = 0;
 let transitionStartCameraY = 0;
 let transitionStartZoom = 1;
-let transitionEndZoom = 5; // High zoom for transition effect
+let transitionEndZoom = 5; 
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -41,11 +40,10 @@ function setup() {
   let seed = random(1000);
   noiseSeed(seed);
   
-  // Generate stars with minimum distance check
-  let attempts = 0;
-  const maxAttempts = 1000; // Prevent infinite loops
-  const minDistance = 30; // Minimum distance between stars
   
+  let attempts = 0;
+  const maxAttempts = 1000; 
+  const minDistance = 30;
   while (stars.length < numStars && attempts < maxAttempts) {
     attempts++;
     
@@ -57,10 +55,10 @@ function setup() {
     x = constrain(x, 50, width-50);
     y = constrain(y, 50, height-50);
     
-    // Check if this star would overlap with existing stars
+  
     let tooClose = false;
     let starSize = random(2, 6);
-    let minDistanceRequired = minDistance + starSize; // Adjust distance based on star size
+    let minDistanceRequired = minDistance + starSize; 
     
     for (let i = 0; i < stars.length; i++) {
       let existingStar = stars[i];
@@ -71,7 +69,7 @@ function setup() {
       }
     }
     
-    // If star is not too close to existing stars, add it
+   
     if (!tooClose) {
       let starName = random(starNames) + " " + random(starSuffixes);
       let starColor = color(
@@ -103,17 +101,16 @@ function setup() {
         pulseRate: random(0.5, 2),
         frequency: random(200, 800),
         pulse: 0,
-        // Store untransformed position for hit detection
+
         originalX: x,
         originalY: y
       });
     }
   }
-  
-  // Log how many stars were successfully created
+
   console.log(`Created ${stars.length} stars after ${attempts} attempts`);
   
-  // If we couldn't create enough stars, reduce the minimum distance
+  
   if (stars.length < numStars * 0.8) {
     console.log("Warning: Could not create enough stars with current spacing");
   }
@@ -132,7 +129,7 @@ function setup() {
   let testSystemButton = createButton('Test System View');
   testSystemButton.position(220, 120);
   testSystemButton.mousePressed(() => {
-    // Force system view with the first star
+  
     startTransitionToStar(stars[0]);
   });
  
@@ -167,7 +164,7 @@ function draw() {
   if (isTransitioning) {
     updateTransition();
   } else {
-    // Normal camera movement when not transitioning
+  
     zoomLevel = lerp(zoomLevel, targetZoomLevel, 0.05);
     cameraX = lerp(cameraX, targetCameraX, 0.05);
     cameraY = lerp(cameraY, targetCameraY, 0.05);
@@ -183,35 +180,33 @@ function draw() {
 }
 
 function updateTransition() {
-  // Calculate progress (0 to 1)
+
   let elapsed = millis() - transitionStartTime;
   let progress = min(elapsed / transitionDuration, 1);
   
-  // Use easeInOutCubic for smooth animation
+  
   let easedProgress = easeInOutCubic(progress);
   
   if (progress < 1) {
-    // During transition to star system
+
     if (transitionStar) {
-      // Calculate position to zoom towards (star position)
+
       let targetX = transitionStar.x;
       let targetY = transitionStar.y;
       
-      // Move camera towards the star
+    
       let worldCenterX = width / 2;
       let worldCenterY = height / 2;
-      
-      // Camera needs to move so that the star is at the center of the screen
       let targetCamX = (targetX - worldCenterX);
       let targetCamY = (targetY - worldCenterY);
       
-      // Interpolate between start and target values
+ 
       cameraX = lerp(transitionStartCameraX, targetCamX, easedProgress);
       cameraY = lerp(transitionStartCameraY, targetCamY, easedProgress);
       zoomLevel = lerp(transitionStartZoom, transitionEndZoom, easedProgress);
     }
   } else {
-    // Transition complete
+
     isTransitioning = false;
     currentView = "system";
     selectedStar = transitionStar;
@@ -224,8 +219,6 @@ function updateTransition() {
     console.log("Transition complete, now in system view");
   }
 }
-
-// Cubic easing function for smooth animation
 function easeInOutCubic(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
@@ -240,7 +233,6 @@ function startTransitionToStar(star) {
   transitionStartCameraX = cameraX;
   transitionStartCameraY = cameraY;
   transitionStartZoom = zoomLevel;
-  // Don't immediately change view - that happens at the end of transition
 }
 
 function drawGalaxy() {
@@ -251,7 +243,7 @@ function drawGalaxy() {
   scale(zoomLevel);
   translate(-width/2, -height/2);
   
-  // Draw background stars
+  
   for (let i = 0; i < 200; i++) {
     let x = noise(i * 0.1, frameCount * 0.0001) * width;
     let y = noise(i * 0.1 + 100, frameCount * 0.0001) * height;
@@ -262,25 +254,20 @@ function drawGalaxy() {
     ellipse(x, y, size, size);
   }
   
-  // Draw stars
   for (let i = 0; i < stars.length; i++) {
     let star = stars[i];
-    
-    // Update pulse animation
     star.pulse = (sin(frameCount * 0.02 * star.pulseRate) + 1) * 0.5;
-    
-    // Draw star glow
     let glowSize = star.size * (1 + star.pulse);
     let glowColor = color(red(star.color), green(star.color), blue(star.color), 100);
     fill(glowColor);
     noStroke();
     ellipse(star.x, star.y, glowSize * 4, glowSize * 4);
     
-    // Draw star core
+  
     fill(star.color);
     ellipse(star.x, star.y, glowSize, glowSize);
     
-    // Make the transitioning star more prominent
+ 
     if (isTransitioning && star === transitionStar) {
       let highlightSize = glowSize * 6;
       let highlightColor = color(255, 255, 255, 50);
@@ -288,13 +275,12 @@ function drawGalaxy() {
       ellipse(star.x, star.y, highlightSize, highlightSize);
     }
     
-    // Audio visualization
+   
     if (isAudioStarted) {
-      // Calculate screen position for distance check
+      
       let screenX = (star.x - width/2) * zoomLevel + width/2 - cameraX;
       let screenY = (star.y - height/2) * zoomLevel + height/2 - cameraY;
-      
-      // Scale amplitude based on distance from mouse
+     
       let d = dist(mouseX, mouseY, screenX, screenY);
       let maxDist = 200;
       let amp = map(d, 0, maxDist, 0.2, 0);
@@ -302,7 +288,7 @@ function drawGalaxy() {
       oscillators[i].amp(amp * star.pulse);
     }
     
-    // Debug information
+  
     if (debugMode) {
       let hitRadius = star.size * 5; 
       stroke(255, 0, 0);
@@ -322,7 +308,7 @@ function drawGalaxy() {
 function drawStarSystem() {
   if (!selectedStar) return;
   
-  // Draw the central star
+ 
   let star = selectedStar;
   star.pulse = (sin(frameCount * 0.02 * star.pulseRate) + 1) * 0.5;
   
@@ -332,19 +318,16 @@ function drawStarSystem() {
   noStroke();
   ellipse(width/2, height/2, glowSize * 2, glowSize * 2);
   
-  // Draw star core
+
   fill(star.color);
   ellipse(width/2, height/2, glowSize, glowSize);
   
-  // Draw orbit paths
   noFill();
   stroke(100, 100, 100, 100);
   for (let i = 0; i < star.planets.length; i++) {
     let planet = star.planets[i];
     ellipse(width/2, height/2, planet.distance * 2, planet.distance * 2);
   }
-  
-  // Draw planets
   for (let i = 0; i < star.planets.length; i++) {
     let planet = star.planets[i];
     
@@ -362,7 +345,7 @@ function drawStarSystem() {
 }
 
 function drawUI() {
-  // Draw info panel
+ 
   fill(10, 15, 30, 200);
   stroke(100, 150, 255, 150);
   rect(10, 10, 250, 100, 10);
@@ -392,8 +375,7 @@ function drawUI() {
     text("Click anywhere to return", 20, 75);
   }
   
-  // Draw help panel
-  fill(10, 15, 30, 200);
+    fill(10, 15, 30, 200);
   stroke(100, 150, 255, 150);
   rect(width - 150, 10, 140, 100, 10);
   
@@ -408,12 +390,12 @@ function mouseClicked() {
   console.log("Mouse clicked at:", mouseX, mouseY);
   
   if (mouseY < 150) {
-    // Ignore clicks in the UI area
+  
     return;
   }
   
   if (isTransitioning) {
-    // Ignore clicks during transition
+    
     return;
   }
   
@@ -424,14 +406,14 @@ function mouseClicked() {
     
     console.log("Transformed mouse position:", mouseWorldX, mouseWorldY);
     
-    // Check if a star was clicked
+ 
     for (let i = 0; i < stars.length; i++) {
       let star = stars[i];
       let d = dist(mouseWorldX, mouseWorldY, star.x, star.y);
-      let hitRadius = star.size * 5; // Larger hit area for easier clicking
+      let hitRadius = star.size * 5;
       
       if (d < hitRadius) {
-        // Start transition to this star
+     
         startTransitionToStar(star);
         return;
       }
@@ -439,7 +421,7 @@ function mouseClicked() {
     
     console.log("No star found at click position");
   } else if (currentView === "system") {
-    // Return to galaxy view
+    
     currentView = "galaxy";
     console.log("Returned to galaxy view");
   }
@@ -450,12 +432,12 @@ function mouseDragged() {
     targetCameraX -= movedX / zoomLevel;
     targetCameraY -= movedY / zoomLevel;
   }
-  return false;  // Prevent default behavior
+  return false; 
 }
 
 function mouseWheel(event) {
   if (currentView === "galaxy" && !isTransitioning) {
-    // Adjust zoom level
+
     let zoomChange = event.delta * -0.001;
     targetZoomLevel = constrain(targetZoomLevel + zoomChange, 0.5, 3);
   }
